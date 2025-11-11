@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/card.schema.json",
+  "title": "Card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "type", "rarity", "cost"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "name_localized": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "set": { "type": "string" },
+    "number": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["Unit", "Spell", "Artifact", "Hero", "Event"]
+    },
+    "subtypes": { "type": "array", "items": { "type": "string" }, "maxItems": 5 },
+    "faction": {
+      "type": "string",
+      "enum": ["Neutral", "Fire", "Water", "Nature", "Shadow", "Light"],
+      "default": "Neutral"
+    },
+    "class": { "type": "string" },
+    "rarity": { "type": "string", "enum": ["Common", "Rare", "Epic", "Legendary"] },
+    "cost": { "type": "integer", "minimum": 0 },
+    "stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attack": { "type": "integer", "minimum": 0 },
+        "health": { "type": "integer", "minimum": 1 },
+        "defense": { "type": "integer", "minimum": 0 },
+        "speed": { "type": "integer", "minimum": 0 },
+        "range": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "rules_text": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "flavor_text": { "type": "string", "maxLength": 120 },
+    "reminder_text": { "type": "string", "maxLength": 120 },
+    "keywords": { "type": "array", "items": { "type": "string" }, "maxItems": 10 },
+    "abilities": {
+      "type": "array",
+      "maxItems": 6,
+      "items": { "$ref": "#/definitions/Ability" }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unique": { "type": "boolean", "default": false },
+        "max_copies": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "craft": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cost": { "type": "integer", "minimum": 0 },
+        "disenchant": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "visual": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artist": { "type": "string" },
+        "illustration": { "type": "string" },
+        "frame": { "type": "string" },
+        "icon": { "type": "string" }
+      }
+    },
+    "localization": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lang": { "type": "string", "minLength": 2, "maxLength": 8 },
+          "title": { "type": "string" },
+          "text": { "type": "string" }
+        },
+        "required": ["lang"]
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" },
+        "created_by": { "type": "string" }
+      }
+    },
+    "archetypes": { "type": "array", "items": { "type": "string" }, "maxItems": 6 },
+    "synergy_tags": { "type": "array", "items": { "type": "string" }, "maxItems": 10 },
+    "balance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "power_budget": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "complexity": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "risk": { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    }
+  },
+  "definitions": {
+    "Ability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trigger", "effect"],
+      "properties": {
+        "name": { "type": "string" },
+        "trigger": { "$ref": "#/definitions/Trigger" },
+        "condition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": { "type": "string" },
+            "code": { "type": "string" }
+          }
+        },
+        "effect": { "$ref": "#/definitions/Effect" },
+        "targets": { "$ref": "#/definitions/Targets" },
+        "duration": { "$ref": "#/definitions/Duration" },
+        "cooldown": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "Trigger": {
+      "type": "string",
+      "enum": [
+        "on_play",
+        "on_attack",
+        "on_death",
+        "on_turn_start",
+        "on_turn_end",
+        "on_damage"
+      ]
+    },
+    "Effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "damage", "heal", "buff", "debuff", "draw", "summon",
+            "generate", "transform", "silence", "destroy", "move",
+            "copy", "steal", "set_stat", "modify_cost"
+          ]
+        },
+        "value": { "type": "number" },
+        "amount": { "type": "integer" },
+        "stat": { "type": "string", "enum": ["attack", "health", "defense", "speed", "range"] },
+        "scaling": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "based_on": { "type": "string" },
+            "bonus": { "type": "number" }
+          }
+        }
+      }
+    },
+    "Targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "selection": {
+          "type": "string",
+          "enum": [
+            "self", "ally", "enemy", "any_unit", "any_enemy_unit",
+            "board_all", "board_all_enemies"
+          ]
+        },
+        "count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "Duration": {
+      "type": "string",
+      "pattern": "^(instant|persistent|turns:\\d+)$"
+    }
+  }
+}

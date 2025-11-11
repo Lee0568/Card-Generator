@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>卡牌生成器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>卡牌生成器</h1>
+      <div class="header-actions">
+        <button id="btnExportPng" class="btn primary">导出 PNG</button>
+        <button id="btnCopyJson" class="btn">复制 JSON</button>
+        <button id="btnSave" class="btn">保存草稿</button>
+        <button id="btnLoad" class="btn">加载草稿</button>
+        <button id="btnClear" class="btn">清空</button>
+        <span id="schemaStatus" class="schema-status" title="Schema 校验状态">未校验</span>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section class="controls">
+        <h2>配置</h2>
+        <div class="field">
+          <label>标签</label>
+          <input id="fldTag" type="text" placeholder="例如：科技" value="科技" />
+        </div>
+        <div class="field">
+          <label>标题</label>
+          <input id="fldTitle" type="text" placeholder="例如：混凝土" value="混凝土" />
+        </div>
+        <div class="field">
+          <label>描述</label>
+          <textarea id="fldDesc" rows="3" placeholder="例如：每回合产出 5 材料">每回合产出 5 材料</textarea>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label>时代等级</label>
+            <input id="fldEra" type="number" min="0" value="2" />
+          </div>
+          <div class="field">
+            <label>能量</label>
+            <input id="fldEnergy" type="number" min="0" value="3" />
+          </div>
+        </div>
+        <div class="field">
+          <label>图标（表情或上传图片）</label>
+          <div class="icon-row">
+            <input id="fldIconEmoji" type="text" maxlength="2" placeholder="例如：🛠" value="🛠" />
+            <input id="fldIconUpload" type="file" accept="image/*" />
+          </div>
+        </div>
+        <div class="field">
+          <label>成本（可增删）</label>
+          <div id="costList" class="cost-list"></div>
+          <button id="btnAddCost" class="btn small" type="button">添加成本</button>
+        </div>
+        <div class="field">
+          <label>主题</label>
+          <div class="grid">
+            <select id="fldTheme">
+              <option value="indigo" selected>靛蓝</option>
+              <option value="teal">蓝绿</option>
+              <option value="rose">玫红</option>
+              <option value="amber">琥珀</option>
+            </select>
+            <input id="fldThemeColor" type="color" value="#4f46e5" />
+          </div>
+          <label class="checkbox-row"><input id="fldDarkMode" type="checkbox" /> 暗色模式</label>
+        </div>
+        <div class="field">
+          <label>导出设置</label>
+          <div class="grid">
+            <select id="fldExportScale">
+              <option value="1">1x</option>
+              <option value="2" selected>2x</option>
+              <option value="3">3x</option>
+            </select>
+            <input id="fldExportPad" type="number" min="0" max="40" value="8" />
+          </div>
+          <label class="checkbox-row"><input id="fldExportTransparent" type="checkbox" checked /> 透明背景</label>
+        </div>
+      </section>
+
+      <section class="preview">
+        <div id="schemaPanel" class="schema-panel" hidden></div>
+        <div id="cardWrap" class="card-wrap">
+        <div id="card" class="card">
+          <div class="card-top">
+            <div class="card-icon" id="cardIcon" aria-hidden="true">🛠</div>
+            <div class="card-tag" id="cardTag">科技</div>
+          </div>
+          <div class="card-title" id="cardTitle">混凝土</div>
+          <div class="card-desc" id="cardDesc">每回合产出 5 材料</div>
+          <div class="card-costs">
+            <div class="label">成本：</div>
+            <div class="chips" id="cardCosts">
+              <span class="chip"><span class="ico">🧱</span><span class="num">4</span></span>
+              <span class="chip"><span class="ico">⚒</span><span class="num">2</span></span>
+            </div>
+          </div>
+          <div class="card-bottom">
+            <div class="era"><span class="pill">时代 <span id="cardEra">2</span></span></div>
+            <div class="energy"><span class="ico">⚡</span><span class="num" id="cardEnergy">3</span></div>
+          </div>
+        </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>统一风格 · 高自定义 · 可导出</span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ajv@8/dist/ajv.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+  </html>
