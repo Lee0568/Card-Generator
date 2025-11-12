@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>卡牌生成器</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#4f46e5" />
   </head>
   <body>
     <header class="app-header">
@@ -12,6 +14,11 @@
       <div class="header-actions">
         <button id="btnExportPng" class="btn primary">导出 PNG</button>
         <button id="btnCopyJson" class="btn">复制 JSON</button>
+        <button id="btnAddToBatch" class="btn">加入批量队列</button>
+        <input id="fldBatchFile" type="file" accept=".json,.csv" style="display:none" />
+        <button id="btnBatchImport" class="btn">批量导入</button>
+        <button id="btnBatchExportZip" class="btn">批量导出 ZIP</button>
+        
         <button id="btnSave" class="btn">保存草稿</button>
         <button id="btnLoad" class="btn">加载草稿</button>
         <button id="btnClear" class="btn">清空</button>
@@ -34,21 +41,29 @@
           <label>描述</label>
           <textarea id="fldDesc" rows="3" placeholder="例如：每回合产出 5 材料">每回合产出 5 材料</textarea>
         </div>
-        <div class="grid">
-          <div class="field">
-            <label>时代等级</label>
-            <input id="fldEra" type="number" min="0" value="2" />
-          </div>
-          <div class="field">
-            <label>能量</label>
-            <input id="fldEnergy" type="number" min="0" value="3" />
-          </div>
+        <div class="field">
+          <label>属性（可增删，图标/文字/颜色可自定义）</label>
+          <div id="attrsList" class="stack"></div>
+          <button id="btnAddAttr" class="btn">添加属性</button>
         </div>
         <div class="field">
           <label>图标（表情或上传图片）</label>
           <div class="icon-row">
             <input id="fldIconEmoji" type="text" maxlength="2" placeholder="例如：🛠" value="🛠" />
             <input id="fldIconUpload" type="file" accept="image/*" />
+            <button id="btnIconLibrary" class="btn small" type="button">图标库</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>模板</label>
+          <div class="grid">
+            <select id="fldTemplateSelect"></select>
+            <input id="fldTemplateName" type="text" placeholder="模板名称" />
+          </div>
+          <div class="icon-row">
+            <button id="btnTemplateSave" class="btn small" type="button">保存模板</button>
+            <button id="btnTemplateApply" class="btn small" type="button">应用模板</button>
+            <button id="btnTemplateDelete" class="btn small" type="button">删除模板</button>
           </div>
         </div>
         <div class="field">
@@ -70,6 +85,27 @@
           <label class="checkbox-row"><input id="fldDarkMode" type="checkbox" /> 暗色模式</label>
         </div>
         <div class="field">
+          <label>卡片背景颜色</label>
+          <div class="grid">
+            <input id="fldCardBgColor" type="color" value="#ffffff" />
+            <input id="fldCardBgColorHex" type="text" placeholder="#ffffff" value="#ffffff" />
+          </div>
+          <div id="cardBgSwatches" class="swatches" aria-label="预设颜色">
+            <button class="swatch" type="button" data-hex="#ffffff" style="background:#ffffff" title="#ffffff"></button>
+            <button class="swatch" type="button" data-hex="#faf6e9" style="background:#faf6e9" title="#faf6e9"></button>
+            <button class="swatch" type="button" data-hex="#f8fafc" style="background:#f8fafc" title="#f8fafc"></button>
+            <button class="swatch" type="button" data-hex="#fef3c7" style="background:#fef3c7" title="#fef3c7"></button>
+            <button class="swatch" type="button" data-hex="#fee2e2" style="background:#fee2e2" title="#fee2e2"></button>
+            <button class="swatch" type="button" data-hex="#e0f2fe" style="background:#e0f2fe" title="#e0f2fe"></button>
+            <button class="swatch" type="button" data-hex="#dcfce7" style="background:#dcfce7" title="#dcfce7"></button>
+            <button class="swatch" type="button" data-hex="#f5f5f4" style="background:#f5f5f4" title="#f5f5f4"></button>
+            <button class="swatch" type="button" data-hex="#e5e7eb" style="background:#e5e7eb" title="#e5e7eb"></button>
+            <button class="swatch" type="button" data-hex="#0b1220" style="background:#0b1220" title="#0b1220"></button>
+            <button class="swatch" type="button" data-hex="#111827" style="background:#111827" title="#111827"></button>
+            <button class="swatch" type="button" data-hex="#1f2937" style="background:#1f2937" title="#1f2937"></button>
+          </div>
+        </div>
+        <div class="field">
           <label>导出设置</label>
           <div class="grid">
             <select id="fldExportScale">
@@ -81,30 +117,56 @@
           </div>
           <label class="checkbox-row"><input id="fldExportTransparent" type="checkbox" checked /> 透明背景</label>
         </div>
+        <div class="field">
+          <label>版面与吸附</label>
+          <div class="grid">
+            <label class="checkbox-row"><input id="fldShowGrid" type="checkbox" /> 显示网格</label>
+            <select id="fldSnapStep">
+              <option value="0">不吸附</option>
+              <option value="2">2px</option>
+              <option value="4" selected>4px</option>
+              <option value="8">8px</option>
+            </select>
+          </div>
+          <label class="checkbox-row"><input id="fldLockDrag" type="checkbox" /> 锁定拖拽</label>
+          <button id="btnResetLayout" class="btn small" type="button">重置位置</button>
+        </div>
       </section>
 
       <section class="preview">
         <div id="schemaPanel" class="schema-panel" hidden></div>
+        
+        <div id="iconLibraryPanel" class="icon-panel" hidden>
+          <div class="icon-panel-inner">
+            <div class="icon-panel-header">
+              <input id="fldIconSearch" type="text" placeholder="搜索图标" />
+              <input id="fldIconColor" type="color" value="#4f46e5" />
+              <button id="btnIconClose" class="btn small" type="button">关闭</button>
+            </div>
+            <div id="iconGrid" class="icon-grid"></div>
+          </div>
+        </div>
         <div id="cardWrap" class="card-wrap">
         <div id="card" class="card">
           <div class="card-top">
-            <div class="card-icon" id="cardIcon" aria-hidden="true">🛠</div>
-            <div class="card-tag" id="cardTag">科技</div>
+            <div class="card-icon draggable" id="cardIcon" aria-hidden="true">🛠</div>
+            <div class="card-tag draggable" id="cardTag">科技</div>
           </div>
-          <div class="card-title" id="cardTitle">混凝土</div>
-          <div class="card-desc" id="cardDesc">每回合产出 5 材料</div>
+          <div class="card-title draggable" id="cardTitle">混凝土</div>
+          <div class="card-desc draggable" id="cardDesc">每回合产出 5 材料</div>
           <div class="card-costs">
             <div class="label">成本：</div>
-            <div class="chips" id="cardCosts">
+            <div class="chips draggable" id="cardCosts">
               <span class="chip"><span class="ico">🧱</span><span class="num">4</span></span>
               <span class="chip"><span class="ico">⚒</span><span class="num">2</span></span>
             </div>
           </div>
           <div class="card-bottom">
-            <div class="era"><span class="pill">时代 <span id="cardEra">2</span></span></div>
-            <div class="energy"><span class="ico">⚡</span><span class="num" id="cardEnergy">3</span></div>
+            <div class="attrs draggable" id="cardAttrs"></div>
           </div>
         </div>
+        <div class="guide-line guide-x" id="guideX" hidden></div>
+        <div class="guide-line guide-y" id="guideY" hidden></div>
         </div>
       </section>
     </main>
@@ -113,8 +175,13 @@
       <span>统一风格 · 高自定义 · 可导出</span>
     </footer>
 
+    
+    
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ajv@8/dist/ajv.min.js"></script>
+    <!-- JSZip 按需加载，避免全局 exports 冲突 -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script> -->
+    <!-- Ajv 仅用于结构校验，若被阻止会自动降级 -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/ajv@8/dist/ajv.bundle.js"></script> -->
     <script src="app.js"></script>
   </body>
   </html>

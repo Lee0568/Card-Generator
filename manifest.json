@@ -1,0 +1,9 @@
+{
+  "name": "卡牌生成器",
+  "short_name": "卡牌",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5"
+  
+}

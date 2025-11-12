@@ -73,18 +73,32 @@ body {
 
 .preview { display: grid; place-items: center; }
 
-.card-wrap { --export-pad: 0px; padding: var(--export-pad); }
+.card-wrap { --export-pad: 0px; padding: var(--export-pad); position: relative; }
+.card-wrap.grid-on {
+  background-image:
+    linear-gradient(to right, rgba(79,70,229,0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(79,70,229,0.08) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
 .card {
   width: 240px; height: 320px; background: var(--card-bg); border-radius: 16px;
   box-shadow: var(--shadow); border: 1px solid var(--border);
   padding: 12px; position: relative;
 }
 .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.card-icon { font-size: 22px; }
+.card-icon { font-size: 22px; display: inline-flex; align-items: center; justify-content: center; }
+.card-icon svg { width: 22px; height: 22px; display: block; }
 .card-tag { background: var(--theme-weak); color: var(--theme); padding: 4px 10px; border-radius: 999px; font-size: 12px; }
 .card-title { font-size: 18px; font-weight: 600; margin: 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-desc { font-size: 13px; color: var(--muted); }
 .card-desc .em { color: #ef4444; font-weight: 600; }
+
+.draggable { cursor: move; }
+.dragging { outline: 2px dashed var(--theme); }
+
+.guide-line { position: absolute; background: rgba(79,70,229,0.4); z-index: 10; }
+.guide-x { left: 50%; top: 0; width: 1px; height: 100%; transform: translateX(-0.5px); }
+.guide-y { top: 50%; left: 0; height: 1px; width: 100%; transform: translateY(-0.5px); }
 
 .card-costs { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
 .card-costs .label { font-size: 12px; color: var(--muted); }
@@ -94,15 +108,37 @@ body {
 .chip .num { font-size: 12px; color: #334155; }
 
 .card-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.attrs { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .pill { background: #eef2ff; color: #374151; padding: 4px 8px; border-radius: 8px; font-size: 12px; border: 1px solid #e5e7eb; }
-.energy { display: inline-flex; align-items: center; gap: 6px; color: #f59e0b; }
-.energy .ico { font-size: 18px; }
-.energy .num { font-weight: 700; }
+.energy { display: none; }
 
 .app-footer { padding: 10px 20px; color: var(--muted); font-size: 12px; }
 
 /* 校验面板 */
 .schema-panel { position: fixed; right: 20px; top: 78px; width: 280px; max-height: 260px; overflow: auto; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; }
 .schema-panel h3 { margin: 0 0 8px; font-size: 13px; }
+
+/* 背景颜色预设色块 */
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; padding: 0; }
 .schema-panel ul { margin: 0; padding-left: 18px; }
 .schema-panel li { font-size: 12px; color: #b91c1c; }
+
+/* 图标库面板 */
+.icon-panel { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); width: 520px; max-width: calc(100% - 40px); }
+.icon-panel-inner { padding: 12px; }
+.icon-panel-header { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; max-height: 240px; overflow: auto; }
+.icon-item { display: grid; place-items: center; padding: 8px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: #fff; }
+.icon-item:hover { border-color: var(--theme); box-shadow: 0 0 0 2px var(--theme-weak); }
+.icon-item svg { width: 24px; height: 24px; }
+
+/* A4 预览 */
+.sheet-modal { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(0,0,0,0.4); display: grid; place-items: center; z-index: 20; }
+.sheet-modal-inner { background: #fff; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); width: 860px; max-width: calc(100% - 40px); }
+.sheet-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.sheet { width: 794px; height: 1123px; margin: 12px auto; background: #fff; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 8px; }
+.sheet-card { display: grid; place-items: center; }
+
+/* 平衡面板 */
